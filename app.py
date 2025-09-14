@@ -58,4 +58,4 @@ def calculate():
     return jsonify({'result': result, 'past_calculations': calc_list})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True) #  For local-  app.run(debug=True)
