@@ -2,96 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Calculator</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Simple Calculator</h1>
-    <input type="text" id="expression" placeholder="Enter expression (e.g., 2 + 2)">
-    <button onclick="calculate()">Calculate</button>
-    <h2>Result: <span id="result"></span></h2>
-    <h3>Past Calculations</h3>
-    <ul id="past-calculations"></ul>
-
-    <script>
-        // Initialize Supabase client
-        const supabase = Supabase.createClient(
-            'https://your-project-ref.supabase.co', // Replace with SUPABASE_URL from Render
-            'your-anon-key' // Replace with SUPABASE_KEY (anon key) from Render
-        );
-
-        // Function to update UI with past calculations
-        function updatePastCalculations(calculations) {
-            const list = document.getElementById('past-calculations');
-            list.innerHTML = ''; // Clear existing list
-            calculations.forEach(calc => {
-                const li = document.createElement('li');
-                li.textContent = `${calc.expression} = ${calc.result} (${new Date(calc.timestamp).toLocaleString()})`;
-                list.appendChild(li);
-            });
-        }
-
-        // Fetch past calculations
-        async function fetchPastCalculations() {
-            const { data, error } = await supabase
-                .from('calculations')
-                .select('*')
-                .order('timestamp', { ascending: false });
-            if (error) {
-                console.error('Error fetching calculations:', error.message);
-                return;
-            }
-            updatePastCalculations(data);
-        }
-
-        // Subscribe to Realtime changes
-        const channel = supabase.channel('realtime-calculations');
-        channel
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'calculations'
-                },
-                (payload) => {
-                    console.log('New calculation:', payload.new);
-                    fetchPastCalculations(); // Refresh full list
-                    // Alternative: Append single entry
-                    // const calc = payload.new;
-                    // const list = document.getElementById('past-calculations');
-                    // const li = document.createElement('li');
-                    // li.textContent = `${calc.expression} = ${calc.result} (${new Date(calc.timestamp).toLocaleString()})`;
-                    // list.prepend(li);
-                }
-            )
-            .subscribe((status) => {
-                console.log('Realtime status:', status);
-                if (status === 'SUBSCRIBED') {
-                    fetchPastCalculations(); // Initial fetch
-                }
-            });
-
-        // Handle calculation submission
-        async function calculate() {
-            const expression = document.getElementById('expression').value;
-            try {
-                const response = await fetch('/calculate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ expression })
-                });
-                const result = await response.json();
-                if (result.error) {
-                    document.getElementById('result').textContent = result.error;
-                } else {
-                    document.getElementById('result').textContent = result.result;
-                }
-            } catch (error) {
-                console.error('Error submitting calculation:', error);
-                document.getElementById('result').textContent = 'Error';
-            }
-        }
-    </script>
+    <div class="container">
+        <h1>Simple Calculator</h1>
+        <input type="text" id="expression" placeholder="Enter expression, e.g., 2+2">
+        <button onclick="calculate()">Calculate</button>
+        <div id="result"></div>
+        <h2>Past Calculations</h2>
+        <ul id="past-list"></ul>
+    </div>
+    <script src="/static/script.js"></script>
 </body>
 </html>
